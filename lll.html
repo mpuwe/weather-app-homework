@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Weather App</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; background: #eee; }
+    #weather { display: none; background: #fff; padding: 20px; margin-top: 20px; border-radius: 8px; }
+  </style>
+</head>
+<body>
+
+<h1>🌦 Weather App</h1>
+
+<input id="cityInput" placeholder="Enter city or country">
+<button onclick="allInput()">Search</button>
+
+<div id="weather">
+  <h2 id="cityName"></h2>
+  <p id="temp"></p>
+  <p id="wind"></p>
+  <p id="desc"></p>
+</div>
+
+<script>
+  const API = "https://goweather.herokuapp.com/weather/";
+
+  function getWeather() {
+    let input = document.getElementById('cityInput').value.trim();
+    if (!input)
+    return alert("Please enter valid a city or country!");
+    // Make an API call to check the location
+    fetch(API + input)
+      .then(response => response.json())
+      .then(data => {
+        // If the response does not contain temperature, it means the city is invalid
+        if (!data.temperature) {
+          alert("Please enter a valid city or country!");
+          return;
+        }
+
+        // Display the weather data if city is valid
+        document.getElementById('cityName').textContent = input;
+        document.getElementById('temp').textContent = "Temperature: " + data.temperature;
+        document.getElementById('wind').textContent = "Wind: " + data.wind;
+        document.getElementById('desc').textContent = "Description: " + (data.description || "No description");
+        document.getElementById('weather').style.display = "block";
+      })
+      .catch(() => alert("Error fetching data!"));
+  }
+</script>
+
+</body>
+</html>

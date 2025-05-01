@@ -4,8 +4,131 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <style>
+      :root {
+          --sunny: #ff0;
+          --windy: #00f;
+          --rainy: darkgrey;
+          --cloudy: grey;
+          --normal: rgb(221, 236, 241);
+      }
+
+        * {
+            text-transform: capitalize;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+        }
+        input {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #wheatherOutput {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 60vh;
+            min-height:350px;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        #wheatherOutput div{
+          margin-top: 50px;
+          font-size: 1rem;
+        }
+
+        #cityName {
+            margin-bottom: 10px;
+        }
+    </style>
 </head>
 <body>
-    <h2>jfdslfjdsfj</h2>
+    <h1 style="font-size: 270%;">🌦 My Weather App</h1> <br>
+    <div id="wheatherOutput"> <br> <br>
+        <h1 id="cityName"></h1>
+        <p id="weathericon"></p> <br>
+        <p id="temp"></p>
+        <p id="weather"></p>
+        <p id="wind"></p>
+        <p id="humidity"></p>
+    </div>
+<br><br>
+<!-- enter the city name or country name to see the weather of that location  -->
+        <input  id="inputData" type="text" name="city" placeholder="Enter city or country name">
+        <button onclick="searchCity()"> search the weather </button>
 </body>
+<script>
+let API = "https://goweather.herokuapp.com/weather/";
+
+let weathericon = document.getElementById("weathericon");
+let weatherOutput = document.getElementById("wheatherOutput");
+let cityName = document.getElementById("cityName");
+let temp = document.getElementById("temp");
+let weather = document.getElementById("weather");
+let wind = document.getElementById("wind");
+let humidity = document.getElementById("humidity");
+
+function searchCity(){
+    let inputData = document.getElementById("inputData").value.trim();
+  if (!inputData) {
+    alert("Please enter valid a city or country!");
+    return;
+  }
+  // fetching data from the JSON
+
+  fetch(API + inputData)
+    .then(response=> response.json())
+    .then (data =>{
+
+      if (!data.temperature) {
+        alert("Please enter a valid city or country!");
+        return;
+      }
+
+      // Display the weather data if city is valid
+      cityName.innerHTML = "City:" + inputData;
+      cityName.style.fontSize = "1.5rem";
+      temp.innerHTML = "Temperature: " + data.temperature;
+      weather.innerHTML = "Weather: " + data.description;
+      wind.innerHTML = "Wind: " + data.wind;
+      humidity.innerHTML = (data.humidity ? "Humidity: " + data.humidity : "Humidity: No description");
+      weathericon.innerHTML ="☁️";
+        changeBackgroundColor(data.description);
+    })
+}
+    function changeBackgroundColor(weatherDescription) {
+    if (weatherDescription.includes("sunny")) {
+        weatherOutput.style.backgroundColor = "var(--sunny)";
+      } else if (weatherDescription.includes("windy")) {
+        weatherOutput.style.backgroundColor = "var(--windy)";
+      } else if (weatherDescription.includes("rainy")) {
+        weatherOutput.style.backgroundColor = "var(--rainy)";
+      } else if (weatherDescription.includes("cloudy")) {
+        weatherOutput.style.backgroundColor = "var(--cloudy)";
+      } else {
+        weatherOutput.style.backgroundColor = "var(--normal)";
+      }
+  }
+</script>
 </html>
