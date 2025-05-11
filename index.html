@@ -1,134 +1,399 @@
-<!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <style>
-      :root {
-          --sunny: #ff0;
-          --windy: #00f;
-          --rainy: darkgrey;
-          --cloudy: grey;
-          --normal: rgb(221, 236, 241);
-      }
-
-        * {
-            text-transform: capitalize;
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            flex-direction: column;
-        }
-        input {
-            padding: 10px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            margin-bottom: 10px;
-        }
-        button {
-            padding: 10px;
-            border-radius: 5px;
-            border: none;
-            background-color: #007bff;
-            color: white;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        #wheatherOutput {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 60vh;
-            min-height:350px;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        #wheatherOutput div{
-          margin-top: 50px;
-          font-size: 1rem;
-        }
-
-        #cityName {
-            margin-bottom: 10px;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>My Weather App</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+  />
+  <style>
+    :root {
+      --sunny: #ffe57f;
+      --windy: #81d4fa;
+      --rainy: #90a4ae;
+      --cloudy: #b0bec5;
+      --normal: #e0f7fa;
+      --primary: #007bff;
+      --primary-hover: #0056b3;
+      --text-color: #333;
+      --card-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+    body {
+      font-family: 'Poppins', sans-serif;
+      text-transform: capitalize;
+      background: linear-gradient(to bottom right, #cfd9df, #e2ebf0);
+      color: var(--text-color);
+      min-height: 100vh;
+    }
+    /* Scrollbar styling for modern browsers */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #007bff;
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #0056b3;
+    }
+  </style>
 </head>
-<body>
-    <h1 style="font-size: 270%;">🌦 My Weather App</h1> <br>
-    <div id="wheatherOutput"> <br> <br>
-        <h1 id="cityName"></h1>
-        <p id="weathericon"></p> <br>
-        <p id="temp"></p>
-        <p id="weather"></p>
-        <p id="wind"></p>
-        <p id="humidity"></p>
-    </div>
-<br><br>
-<!-- enter the city name or country name to see the weather of that location  -->
-        <input  id="inputData" type="text" name="city" placeholder="Enter city or country name">
-        <button onclick="searchCity()"> search the weather </button>
-</body>
-<script>
-let API = "https://goweather.herokuapp.com/weather/";
+<body class="flex flex-col min-h-screen justify-center items-center p-6 bg-gradient-to-br from-slate-200 to-slate-100">
+  <header class="mb-10 text-center max-w-lg w-full">
+    <h1 class="text-5xl font-extrabold mb-2 select-none tracking-wide text-blue-700 drop-shadow-md">
+      🌦 My Weather App
+    </h1>
+    <p class="text-gray-600 text-lg font-medium">
+      Get real-time weather updates for any location worldwide — from sell, sector, district, city, to country.
+    </p>
+  </header>
 
-let weathericon = document.getElementById("weathericon");
-let weatherOutput = document.getElementById("wheatherOutput");
-let cityName = document.getElementById("cityName");
-let temp = document.getElementById("temp");
-let weather = document.getElementById("weather");
-let wind = document.getElementById("wind");
-let humidity = document.getElementById("humidity");
+  <main class="w-full max-w-6xl bg-white rounded-3xl shadow-xl p-8 transition-colors duration-500 flex flex-col md:flex-row gap-10" id="weatherOutput" aria-live="polite" aria-atomic="true">
+    <section class="flex-1 flex flex-col items-center">
+      <div id="cityName" class="text-2xl font-bold mb-6 text-center text-blue-800 break-words w-full max-w-md"></div>
+      <div class="flex justify-center mb-8" aria-label="Weather icon" style="min-width:140px;">
+        <div id="weatherIcon" class="text-[40px] select-none flex items-center justify-center rounded-full bg-blue-100 text-blue-600 font-semibold px-6 py-2 min-w-[140px] min-h-[40px] opacity-0 transition-opacity duration-300" aria-hidden="true"></div>
+      </div>
 
-function searchCity(){
-    let inputData = document.getElementById("inputData").value.trim();
-  if (!inputData) {
-    alert("Please enter valid a city or country!");
-    return;
-  }
-  // fetching data from the JSON
+      <section class="grid grid-cols-2 gap-6 text-gray-700 text-lg font-semibold w-full max-w-md">
+        <div class="flex items-center space-x-3 justify-start">
+          <i class="fas fa-thermometer-half text-3xl text-red-500"></i>
+          <span id="temp" class="select-text"></span>
+        </div>
+        <div class="flex items-center space-x-3 justify-start">
+          <i class="fas fa-cloud-sun text-3xl text-yellow-400"></i>
+          <span id="weather" class="select-text"></span>
+        </div>
+        <div class="flex items-center space-x-3 justify-start">
+          <i class="fas fa-wind text-3xl text-blue-400"></i>
+          <span id="wind" class="select-text"></span>
+        </div>
+        <div class="flex items-center space-x-3 justify-start">
+          <i class="fas fa-tint text-3xl text-cyan-500"></i>
+          <span id="humidity" class="select-text"></span>
+        </div>
+      </section>
+    </section>
 
-  fetch(API + inputData)
-    .then(response=> response.json())
-    .then (data =>{
+    <section class="flex-1 flex flex-col max-w-md w-full">
+      <form
+        id="searchForm"
+        class="flex flex-col sm:flex-row gap-4 mb-10"
+        onsubmit="event.preventDefault(); searchCity();"
+        aria-label="Search weather form"
+      >
+        <input
+          id="inputData"
+          type="text"
+          placeholder="Enter any location (sell, sector, district, city, country)"
+          aria-label="Location input"
+          class="flex-grow p-4 rounded-xl border border-gray-300 text-lg focus:outline-none focus:ring-4 focus:ring-blue-400 transition"
+          required
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <button
+          type="submit"
+          class="bg-blue-600 hover:bg-blue-800 text-white font-semibold rounded-xl px-8 py-4 transition-colors duration-300 shadow-md focus:outline-none focus:ring-4 focus:ring-blue-500"
+          aria-label="Search weather"
+        >
+          Search
+        </button>
+      </form>
 
-      if (!data.temperature) {
-        alert("Please enter a valid city or country!");
+      <section
+        id="forecastSection"
+        class="bg-white rounded-3xl shadow-xl p-6 hidden flex-col flex-grow"
+        aria-label="5 day weather forecast"
+      >
+        <h2 class="text-2xl font-bold mb-6 text-center text-blue-800">
+          5-Day Forecast
+        </h2>
+        <div id="forecastContainer" class="flex gap-4 overflow-x-auto px-2"></div>
+      </section>
+
+      <section
+        id="historySection"
+        class="bg-white rounded-3xl shadow-xl p-6 mt-10 flex-grow overflow-y-auto max-h-[300px]"
+        aria-label="Search history"
+      >
+        <h2 class="text-2xl font-bold mb-4 text-blue-800 text-center">Search History</h2>
+        <ul id="historyList" class="divide-y divide-gray-200">
+          <!-- History items inserted here -->
+        </ul>
+        <button
+          id="clearHistoryBtn"
+          class="mt-4 w-full bg-red-600 hover:bg-red-800 text-white font-semibold rounded-xl py-3 transition-colors duration-300 shadow-md focus:outline-none focus:ring-4 focus:ring-red-500"
+          aria-label="Clear search history"
+          type="button"
+        >
+          Clear History
+        </button>
+      </section>
+    </section>
+  </main>
+
+  <footer class="mt-16 mb-6 text-center text-gray-500 text-sm select-none max-w-6xl w-full px-6">
+    &copy; 2024 My Weather App. Powered by <a href="https://goweather.herokuapp.com/" target="_blank" rel="noopener noreferrer" class="underline hover:text-blue-600">GoWeather API</a>.
+  </footer>
+
+  <script>
+    const API = "https://goweather.herokuapp.com/weather/";
+    const weatherOutput = document.getElementById("weatherOutput");
+    const cityName = document.getElementById("cityName");
+    const weatherIcon = document.getElementById("weatherIcon");
+    const temp = document.getElementById("temp");
+    const weather = document.getElementById("weather");
+    const wind = document.getElementById("wind");
+    const humidity = document.getElementById("humidity");
+    const forecastSection = document.getElementById("forecastSection");
+    const forecastContainer = document.getElementById("forecastContainer");
+    const inputData = document.getElementById("inputData");
+    const historyList = document.getElementById("historyList");
+    const clearHistoryBtn = document.getElementById("clearHistoryBtn");
+
+    // Show or hide processing indicator
+    function showProcessing(show) {
+      if (show) {
+        weatherIcon.textContent = "Processing...";
+        weatherIcon.classList.remove("opacity-0");
+      } else {
+        weatherIcon.classList.add("opacity-0");
+      }
+    }
+
+    // Load search history from localStorage
+    function loadHistory() {
+      const history = JSON.parse(localStorage.getItem("weatherSearchHistory")) || [];
+      renderHistory(history);
+    }
+
+    // Save a new search term with timestamp to history (allow duplicates)
+    function saveToHistory(term) {
+      if (!term) return;
+      let history = JSON.parse(localStorage.getItem("weatherSearchHistory")) || [];
+      const now = new Date();
+      const timestamp = now.toLocaleString(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+      });
+      history.unshift({ term: term.trim(), time: timestamp });
+      // Limit to 20 items
+      if (history.length > 20) history = history.slice(0, 20);
+      localStorage.setItem("weatherSearchHistory", JSON.stringify(history));
+      renderHistory(history);
+    }
+
+    // Render history list with time, allow duplicates
+    function renderHistory(history) {
+      historyList.innerHTML = "";
+      if (history.length === 0) {
+        historyList.innerHTML = `<li class="text-center text-gray-400 py-4 select-none">No search history yet.</li>`;
+        clearHistoryBtn.disabled = true;
+        clearHistoryBtn.classList.add("opacity-50", "cursor-not-allowed");
+        return;
+      }
+      clearHistoryBtn.disabled = false;
+      clearHistoryBtn.classList.remove("opacity-50", "cursor-not-allowed");
+
+      history.forEach(({ term, time }) => {
+        const li = document.createElement("li");
+        li.className = "py-3 px-4 cursor-pointer hover:bg-blue-100 rounded select-text flex justify-between items-center";
+        li.title = `Search weather for "${term}" at ${time}`;
+        li.tabIndex = 0;
+        li.setAttribute("role", "button");
+
+        const termSpan = document.createElement("span");
+        termSpan.textContent = term;
+
+        const timeSpan = document.createElement("span");
+        timeSpan.textContent = time;
+        timeSpan.className = "text-xs text-gray-500 ml-4 whitespace-nowrap";
+
+        li.appendChild(termSpan);
+        li.appendChild(timeSpan);
+
+        li.addEventListener("click", () => {
+          inputData.value = term;
+          searchCity();
+        });
+        li.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            li.click();
+          }
+        });
+        historyList.appendChild(li);
+      });
+    }
+
+    // Clear history
+    clearHistoryBtn.addEventListener("click", () => {
+      localStorage.removeItem("weatherSearchHistory");
+      renderHistory([]);
+    });
+
+    function clearWeatherData() {
+      cityName.textContent = "";
+      weatherIcon.textContent = "";
+      weatherIcon.classList.add("opacity-0");
+      temp.textContent = "";
+      weather.textContent = "";
+      wind.textContent = "";
+      humidity.textContent = "";
+      forecastContainer.innerHTML = "";
+      forecastSection.classList.add("hidden");
+      weatherOutput.style.backgroundColor = "var(--normal)";
+    }
+
+    async function searchCity() {
+      const query = inputData.value.trim();
+      if (!query) {
+        alert("Please enter a valid location!");
         return;
       }
 
-      // Display the weather data if city is valid
-      cityName.innerHTML = "City:" + inputData;
-      cityName.style.fontSize = "1.5rem";
-      temp.innerHTML = "Temperature: " + data.temperature;
-      weather.innerHTML = "Weather: " + data.description;
-      wind.innerHTML = "Wind: " + data.wind;
-      humidity.innerHTML = (data.humidity ? "Humidity: " + data.humidity : "Humidity: No description");
-      weathericon.innerHTML ="☁️";
-        changeBackgroundColor(data.description);
-    })
-}
-    function changeBackgroundColor(weatherDescription) {
-    if (weatherDescription.includes("sunny")) {
+      clearWeatherData();
+      showProcessing(true);
+
+      try {
+        const res = await fetch(API + encodeURIComponent(query));
+        const data = await res.json();
+
+        showProcessing(false);
+
+        if (!data.temperature || data.temperature === "") {
+          alert("Please enter a valid location!");
+          weatherIcon.textContent = "❓";
+          weatherIcon.classList.remove("opacity-0");
+          return;
+        }
+
+        cityName.textContent = `🌍 ${query}`;
+        temp.textContent = `Temperature: ${data.temperature}`;
+        weather.textContent = `Weather: ${data.description || "No description"}`;
+        wind.textContent = `Wind: ${data.wind || "No data"}`;
+        humidity.textContent = data.humidity
+          ? `Humidity: ${data.humidity}`
+          : `Humidity: No description`;
+
+        updateWeatherIcon(data.description.toLowerCase());
+        changeBackgroundColor(data.description.toLowerCase());
+
+        if (data.forecast && Array.isArray(data.forecast) && data.forecast.length > 0) {
+          renderForecast(data.forecast);
+        } else {
+          forecastSection.classList.add("hidden");
+        }
+
+        saveToHistory(query);
+      } catch (err) {
+        showProcessing(false);
+        console.error("Error fetching weather data:", err);
+        alert("Something went wrong. Please try again later.");
+        weatherIcon.textContent = "❌";
+        weatherIcon.classList.remove("opacity-0");
+        temp.textContent = "";
+        weather.textContent = "";
+        wind.textContent = "";
+        humidity.textContent = "";
+        forecastContainer.innerHTML = "";
+        forecastSection.classList.add("hidden");
+        weatherOutput.style.backgroundColor = "var(--normal)";
+      }
+    }
+
+    function updateWeatherIcon(description) {
+      if (description.includes("sunny")) {
+        weatherIcon.textContent = "☀️";
+      } else if (description.includes("cloudy")) {
+        weatherIcon.textContent = "☁️";
+      } else if (description.includes("rainy")) {
+        weatherIcon.textContent = "🌧️";
+      } else if (description.includes("windy")) {
+        weatherIcon.textContent = "🌬️";
+      } else if (description.includes("snow")) {
+        weatherIcon.textContent = "❄️";
+      } else if (description.includes("storm")) {
+        weatherIcon.textContent = "⛈️";
+      } else {
+        weatherIcon.textContent = "🌈";
+      }
+      weatherIcon.classList.remove("opacity-0");
+    }
+
+    function changeBackgroundColor(description) {
+      if (description.includes("sunny")) {
         weatherOutput.style.backgroundColor = "var(--sunny)";
-      } else if (weatherDescription.includes("windy")) {
+      } else if (description.includes("windy")) {
         weatherOutput.style.backgroundColor = "var(--windy)";
-      } else if (weatherDescription.includes("rainy")) {
+      } else if (description.includes("rainy")) {
         weatherOutput.style.backgroundColor = "var(--rainy)";
-      } else if (weatherDescription.includes("cloudy")) {
+      } else if (description.includes("cloudy")) {
         weatherOutput.style.backgroundColor = "var(--cloudy)";
+      } else if (description.includes("snow")) {
+        weatherOutput.style.backgroundColor = "#d0e7f9";
+      } else if (description.includes("storm")) {
+        weatherOutput.style.backgroundColor = "#a3a3a3";
       } else {
         weatherOutput.style.backgroundColor = "var(--normal)";
       }
-  }
-</script>
+    }
+
+    function renderForecast(forecast) {
+      forecastContainer.innerHTML = "";
+      forecastSection.classList.remove("hidden");
+
+      // The API returns forecast array with day, temperature, wind
+      // We will show up to 5 days (usually API returns 3 days max)
+      const daysToShow = forecast.slice(0, 5);
+
+      daysToShow.forEach((day) => {
+        const dayName = day.day || "Day";
+        const tempText = day.temperature || "N/A";
+        const windText = day.wind || "N/A";
+
+        // Determine icon for forecast day based on description keywords in temperature or wind
+        let icon = "🌈";
+        const desc = (day.temperature + " " + day.wind).toLowerCase();
+        if (desc.includes("sunny")) icon = "☀️";
+        else if (desc.includes("cloudy")) icon = "☁️";
+        else if (desc.includes("rainy")) icon = "🌧️";
+        else if (desc.includes("windy")) icon = "🌬️";
+        else if (desc.includes("snow")) icon = "❄️";
+        else if (desc.includes("storm")) icon = "⛈️";
+
+        const card = document.createElement("article");
+        card.className =
+          "bg-blue-50 rounded-2xl p-4 flex flex-col items-center shadow-md hover:shadow-lg transition-shadow duration-300 min-w-[120px]";
+
+        card.innerHTML = `
+          <h3 class="font-semibold text-lg mb-2 text-blue-700 text-center">${dayName}</h3>
+          <div class="text-5xl mb-2 select-none" aria-hidden="true">${icon}</div>
+          <p class="text-sm text-gray-700 mb-1 text-center">Temp: ${tempText}</p>
+          <p class="text-sm text-gray-700 text-center">Wind: ${windText}</p>
+        `;
+
+        forecastContainer.appendChild(card);
+      });
+    }
+
+    // Initialize
+    loadHistory();
+  </script>
+</body>
 </html>
